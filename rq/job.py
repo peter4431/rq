@@ -965,7 +965,8 @@ class Job:
         try:
             self.meta = self.serializer.loads(obj.get('meta')) if obj.get('meta') else {}
         except Exception:  # depends on the serializer
-            self.meta = {'unserialized': obj.get('meta', {})}
+            import traceback
+            self.meta = {'unserialized': obj.get('meta', {}), 'stack': traceback.format_exc()}
 
         self.retries_left = int(obj.get('retries_left')) if obj.get('retries_left') else None
         if obj.get('retry_intervals'):
