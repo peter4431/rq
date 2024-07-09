@@ -335,6 +335,8 @@ class Job:
             status (JobStatus): The Job Status to be set
             pipeline (Optional[Pipeline], optional): Optional Redis Pipeline to use. Defaults to None.
         """
+        if status == JobStatus.SCHEDULED:
+            logger.info("set scheduled:" + self.id, stack_info=True, stacklevel=5)
         self._status = status
         connection: 'Redis' = pipeline if pipeline is not None else self.connection
         connection.hset(self.key, 'status', self._status)
@@ -1508,6 +1510,7 @@ class Job:
         self.retries_left = self.retries_left - 1
         if retry_interval:
             scheduled_datetime = datetime.now(timezone.utc) + timedelta(seconds=retry_interval)
+            logger.info("schedule:" + self.id, stack_info=True, stacklevel=5)
             self.set_status(JobStatus.SCHEDULED)
             queue.schedule_job(self, scheduled_datetime, pipeline=pipeline)
         else:
